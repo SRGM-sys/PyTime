@@ -5,31 +5,30 @@ import ujson
 import network
 from umqtt.simple import MQTTClient
 
-# Parámetros del servidor MQTT (Ubidots)
 MQTT_CLIENT_ID = "micropython-weather-demo"
 MQTT_BROKER = "industrial.api.ubidots.com"
 MQTT_USER = "PEGAR-AQUÍ-EL-TOKEN-OBTENIDO"
 MQTT_PASSWORD = ""
 MQTT_TOPIC = "NIOT-PyTime-IOT"
 
-# Configuración de pines (pueden cambiar según tu circuito)
 pin_led1 = 16
 pin_led2 = 17
 sensor = dht.DHT11(Pin(15))
 led1 = Pin(pin_led1, Pin.OUT)
 led2 = Pin(pin_led2, Pin.OUT)
 
-# Conexión a la red WiFi
+SSID_RED = "PEGAR-AQUI-NOMBRE-DEL-HOST"
+PASSWORD_RED = "PEGAR-AQUI-CONTRASEÑA-DEL-HOST"
+
 print("Connecting to WiFi", end="")
 sta_if = network.WLAN(network.STA_IF)
 sta_if.active(True)
-sta_if.connect("SSID-RED", "PASSWORD-RED")  # Reemplazar con los datos de la red
+sta_if.connect(SSID_RED, PASSWORD_RED)
 while not sta_if.isconnected():
     print(".", end="")
     time.sleep(0.1)
 print(" Connected!")
 
-# Conexión al servidor MQTT de Ubidots
 print("Connecting to MQTT server... ", end="")
 client = MQTTClient(
     MQTT_CLIENT_ID,
@@ -40,7 +39,6 @@ client = MQTTClient(
 client.connect()
 print("Connected!")
 
-# Lectura del sensor, control de LEDs y envío de datos
 prev_weather = ""
 while True:
     try:
@@ -52,7 +50,6 @@ while True:
         }
         message = ujson.dumps(datos)
 
-        # Validamos que el valor de temperatura o humedad cambie antes de publicar
         if message != prev_weather:
             print("Updated!")
             print("Reporting to MQTT topic {}: {}".format(MQTT_TOPIC, message))
